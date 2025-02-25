@@ -1,0 +1,28 @@
+{
+  "canisters": {
+    "bitobytes_backend": {
+      "main": "src/bitobytes_backend/main.mo",
+      "type": "motoko"
+    },
+    "bitobytes_frontend": {
+      "dependencies": [
+        "bitobytes_backend"
+      ],
+      "frontend": {
+        "entrypoint": "src/bitobytes_frontend/src/index.html"
+      },
+      "source": [
+        "src/bitobytes_frontend/assets",
+        "dist/bitobytes_frontend/"
+      ],
+      "type": "assets"
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  },
+  "version": 1
+}
