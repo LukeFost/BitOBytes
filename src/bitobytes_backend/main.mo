@@ -5,9 +5,12 @@ import Principal "mo:base/Principal";
 import HashMap "mo:base/HashMap";
 import Iter "mo:base/Iter";
 import Hash "mo:base/Hash";
+import Array "mo:base/Array";
 
 actor {
-  // Video Data Structure
+  /*************************************************
+   * Video Types & Logic (already present)
+   *************************************************/
   public type Video = {
     id: Nat64;
     uploader: Principal;
@@ -63,5 +66,61 @@ actor {
         return true;
       };
     }
+  };
+
+  /*************************************************
+   * NEW: Profile Types & Logic
+   *************************************************/
+  public type UserProfile = {
+    name: Text;
+    avatarUrl: Text;
+    owner: Principal;
+  };
+
+  // Store profiles by Principal
+  private var profiles = HashMap.HashMap<Principal, UserProfile>(
+    0,
+    Principal.equal,
+    Principal.hash
+  );
+
+  /**
+   * Set (or update) the caller's profile
+   */
+  public shared(msg) func saveMyProfile(name: Text, avatarUrl: Text) : async UserProfile {
+    let callerPrincipal = msg.caller;
+    let profile: UserProfile = {
+      name = name;
+      avatarUrl = avatarUrl;
+      owner = callerPrincipal;
+    };
+    profiles.put(callerPrincipal, profile);
+    return profile;
+  };
+
+  /**
+   * Get the caller's own profile
+   */
+  public shared query(msg) func getMyProfile() : async ?UserProfile {
+    return profiles.get(msg.caller);
+  };
+
+  /**
+   * A method to list all profiles
+   */
+  public query func listProfiles() : async [UserProfile] {
+    return Iter.toArray(profiles.vals());
+  };
+
+  /**
+   * Get only the videos that belong to the caller
+   */
+  public shared query(msg) func getMyVideos() : async [Video] {
+    let callerPrincipal = msg.caller;
+    let allVideos = Iter.toArray(videos.vals());
+    
+    return Array.filter<Video>(allVideos, func (v: Video) : Bool {
+      Principal.equal(v.uploader, callerPrincipal)
+    });
   };
 }

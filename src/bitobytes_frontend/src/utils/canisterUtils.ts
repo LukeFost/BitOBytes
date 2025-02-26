@@ -12,10 +12,23 @@ export interface Video {
   timestamp: bigint;
 }
 
+export interface UserProfile {
+  name: string;
+  avatarUrl: string;
+  owner: Principal;
+}
+
 export interface BitobytesBackend {
+  // Existing video methods
   addVideo: (title: string, mediaRef: string) => Promise<bigint>;
   getVideos: () => Promise<Video[]>;
   likeVideo: (videoId: bigint) => Promise<boolean>;
+  
+  // New profile methods
+  saveMyProfile: (name: string, avatarUrl: string) => Promise<UserProfile>;
+  getMyProfile: () => Promise<UserProfile | null>; // Changed to match how we're using it
+  listProfiles: () => Promise<UserProfile[]>;
+  getMyVideos: () => Promise<Video[]>;
 }
 
 // Will be filled in by dfx generate after deployment
@@ -36,7 +49,7 @@ export const initializeCanister = async () => {
     }
 
     // Use the correct canister ID from deployment
-    canisterId = isLocalEnv ? 'bkyz2-fmaaa-aaaaa-qaaaq-cai' : 'YOUR_PRODUCTION_CANISTER_ID';
+    canisterId = isLocalEnv ? 'bw4dl-smaaa-aaaaa-qaacq-cai' : 'YOUR_PRODUCTION_CANISTER_ID';
     
     // Once we have generated declarations, we'll replace this with properly typed Actor
     actor = Actor.createActor<BitobytesBackend>(
@@ -50,10 +63,24 @@ export const initializeCanister = async () => {
           'likes': IDL.Nat,
           'timestamp': IDL.Int,
         });
+        
+        const UserProfile = IDL.Record({
+          'name': IDL.Text,
+          'avatarUrl': IDL.Text,
+          'owner': IDL.Principal,
+        });
+        
         return IDL.Service({
+          // Existing video methods
           'addVideo': IDL.Func([IDL.Text, IDL.Text], [IDL.Nat64], []),
           'getVideos': IDL.Func([], [IDL.Vec(Video)], ['query']),
           'likeVideo': IDL.Func([IDL.Nat64], [IDL.Bool], []),
+          
+          // New profile methods
+          'saveMyProfile': IDL.Func([IDL.Text, IDL.Text], [UserProfile], []),
+          'getMyProfile': IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
+          'listProfiles': IDL.Func([], [IDL.Vec(UserProfile)], ['query']),
+          'getMyVideos': IDL.Func([], [IDL.Vec(Video)], ['query']),
         });
       },
       { agent, canisterId }

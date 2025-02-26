@@ -27,12 +27,20 @@ const Navigation: React.FC = () => {
             </Link>
             
             {isAuthenticated && (
-              <Link 
-                href="/profile" 
-                className={`hover:text-blue-300 ${isActive('/profile') ? 'text-blue-300' : ''}`}
-              >
-                Profile
-              </Link>
+              <>
+                <Link 
+                  href="/profile" 
+                  className={`hover:text-blue-300 ${isActive('/profile') ? 'text-blue-300' : ''}`}
+                >
+                  Profile
+                </Link>
+                <Link 
+                  href="/allProfiles" 
+                  className={`hover:text-blue-300 ${isActive('/allProfiles') ? 'text-blue-300' : ''}`}
+                >
+                  All Profiles
+                </Link>
+              </>
             )}
           </div>
         </div>

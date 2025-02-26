@@ -60,18 +60,44 @@ actor SiweProvider {
     identitiesEntries := [];
   };
 
-  // Generate a SIWE message for the given address
-  public func generateSiweMessage(address : Text) : async SiweMessage {
+  // Environment configuration
+  private stable var productionDomain : Text = "bitobytes.icp";
+  private stable var productionUri : Text = "https://bitobytes.icp";
+  private stable var developmentDomain : Text = "localhost:3000";
+  private stable var developmentUri : Text = "http://localhost:3000";
+  
+  // Generate a SIWE message for the given address with optional environment parameters
+  public func generateSiweMessage(
+    address : Text, 
+    customDomain : ?Text, 
+    customUri : ?Text,
+    isProduction : ?Bool
+  ) : async SiweMessage {
     let nonce = generateNonce();
     let currentTime = Time.now();
     let issuedAt = Int.toText(currentTime);
     
+    // Determine which domain and URI to use based on parameters
+    let domain = switch (customDomain, isProduction) {
+      case (?d, _) { d }; // Custom domain takes precedence
+      case (null, ?false) { developmentDomain };
+      case (null, ?true) { productionDomain };
+      case (null, null) { productionDomain }; // Default to production
+    };
+    
+    let uri = switch (customUri, isProduction) {
+      case (?u, _) { u }; // Custom URI takes precedence
+      case (null, ?false) { developmentUri };
+      case (null, ?true) { productionUri };
+      case (null, null) { productionUri }; // Default to production
+    };
+    
     // Create a SIWE message
     let message : SiweMessage = {
-      domain = "bitobytes.icp";
+      domain = domain;
       address = address;
       statement = "Sign in with Ethereum to BitOBytes on the Internet Computer";
-      uri = "https://bitobytes.icp";
+      uri = uri;
       version = "1";
       chainId = 1; // Ethereum mainnet
       nonce = nonce;
@@ -83,6 +109,16 @@ actor SiweProvider {
     };
     
     return message;
+  };
+  
+  // Convenience method for generating a SIWE message with production settings
+  public func generateProductionSiweMessage(address : Text) : async SiweMessage {
+    await generateSiweMessage(address, null, null, ?true);
+  };
+  
+  // Convenience method for generating a SIWE message with local development settings
+  public func generateLocalSiweMessage(address : Text) : async SiweMessage {
+    await generateSiweMessage(address, null, null, ?false);
   };
 
   // Verify a signed message and create a delegation
@@ -122,5 +158,51 @@ actor SiweProvider {
     let now = Int.toText(Time.now());
     let rand = Int.toText(Time.now() % 1000000);
     now # "-" # rand
+  };
+  
+  // Update environment configuration
+  public shared(msg) func updateEnvironmentConfig(
+    newProductionDomain : ?Text,
+    newProductionUri : ?Text,
+    newDevelopmentDomain : ?Text,
+    newDevelopmentUri : ?Text
+  ) : async () {
+    // In a production environment, you might want to add access control here
+    // to ensure only authorized principals can update the configuration
+    
+    switch (newProductionDomain) {
+      case (?domain) { productionDomain := domain };
+      case (null) {};
+    };
+    
+    switch (newProductionUri) {
+      case (?uri) { productionUri := uri };
+      case (null) {};
+    };
+    
+    switch (newDevelopmentDomain) {
+      case (?domain) { developmentDomain := domain };
+      case (null) {};
+    };
+    
+    switch (newDevelopmentUri) {
+      case (?uri) { developmentUri := uri };
+      case (null) {};
+    };
+  };
+  
+  // Get current environment configuration
+  public query func getEnvironmentConfig() : async {
+    productionDomain : Text;
+    productionUri : Text;
+    developmentDomain : Text;
+    developmentUri : Text;
+  } {
+    {
+      productionDomain = productionDomain;
+      productionUri = productionUri;
+      developmentDomain = developmentDomain;
+      developmentUri = developmentUri;
+    }
   };
 }

@@ -97,11 +97,18 @@ export function patchFetch(): void {
         fetchingRootKey = true;
       } else {
         try {
-          // Only try to ensure root key if we're not already fetching it
-          if (rootKeyFetched === false && rootKeyPromise === null) {
-            await ensureRootKey();
-          } else if (rootKeyPromise) {
-            await rootKeyPromise;
+          // Prevent recursive calls by checking if we're already fetching the root key
+          if (!fetchingRootKey && rootKeyFetched === false) {
+            fetchingRootKey = true;
+            try {
+              if (rootKeyPromise === null) {
+                await ensureRootKey();
+              } else if (rootKeyPromise) {
+                await rootKeyPromise;
+              }
+            } finally {
+              fetchingRootKey = false;
+            }
           }
         } catch (error) {
           console.error('Failed to fetch root key before request:', error);

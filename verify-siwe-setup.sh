@@ -100,7 +100,7 @@ echo "Checking frontend dependencies..."
 if [ ! -d "src/bitobytes_frontend/node_modules" ]; then
     echo "❌ Frontend dependencies are not installed. Installing..."
     cd src/bitobytes_frontend
-    npm install
+    npm install --legacy-peer-deps
     cd ../..
 else
     echo "✅ Frontend dependencies are installed"
