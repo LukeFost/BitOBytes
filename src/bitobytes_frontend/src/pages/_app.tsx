@@ -13,6 +13,8 @@ if (typeof window !== 'undefined') {
     env: {
       ...window.process?.env,
       NEXT_PUBLIC_SIWE_CANISTER_ID: process.env.NEXT_PUBLIC_SIWE_CANISTER_ID,
+      NEXT_PUBLIC_BACKEND_CANISTER_ID: process.env.NEXT_PUBLIC_BACKEND_CANISTER_ID,
+      NEXT_PUBLIC_FRONTEND_CANISTER_ID: process.env.NEXT_PUBLIC_FRONTEND_CANISTER_ID,
       NEXT_PUBLIC_IC_HOST: process.env.NEXT_PUBLIC_IC_HOST || 'http://localhost:4943',
     }
   };

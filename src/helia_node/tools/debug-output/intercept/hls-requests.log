@@ -1,0 +1,13 @@
+[2025-02-27T20:51:05.692Z] HLS Request Interceptor running at http://localhost:3003
+[2025-02-27T20:51:05.693Z] Proxying requests to http://localhost:3001
+[2025-02-27T20:51:05.693Z] Debug UI available at http://localhost:3003/debug
+[2025-02-27T20:51:56.966Z] HLS Request Interceptor running at http://localhost:3003
+[2025-02-27T20:51:56.967Z] Proxying requests to http://localhost:3001
+[2025-02-27T20:51:56.967Z] Debug UI available at http://localhost:3003/debug
+[2025-02-27T20:51:59.534Z] GET /debug
+[2025-02-27T20:51:59.571Z] GET /favicon.ico
+[2025-02-27T20:52:01.652Z] GET /debug
+[2025-02-27T20:52:13.984Z] GET /debug
+[2025-02-27T20:52:14.142Z] GET /favicon.ico
+[2025-02-27T20:52:36.574Z] GET /debug
+[2025-02-27T20:52:53.737Z] GET /debug

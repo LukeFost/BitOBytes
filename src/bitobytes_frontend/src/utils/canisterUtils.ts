@@ -8,7 +8,11 @@ export interface Video {
   uploader: Principal;
   title: string;
   mediaRef: string;
+  thumbnailCid: string;
+  hlsCid: string;
+  duration: bigint;
   likes: bigint;
+  views: bigint;
   timestamp: bigint;
 }
 
@@ -20,11 +24,15 @@ export interface UserProfile {
 
 export interface BitobytesBackend {
   // Existing video methods
-  addVideo: (title: string, mediaRef: string) => Promise<bigint>;
+  addVideo: (title: string, mediaRef: string, thumbnailCid: string, hlsCid: string, duration: number) => Promise<bigint>;
   getVideos: () => Promise<Video[]>;
   likeVideo: (videoId: bigint) => Promise<boolean>;
   
-  // New profile methods
+  // New video methods
+  getVideo: (videoId: bigint) => Promise<Video | null>;
+  incrementViewCount: (videoId: bigint) => Promise<boolean>;
+  
+  // Profile methods
   saveMyProfile: (name: string, avatarUrl: string) => Promise<UserProfile>;
   getMyProfile: () => Promise<UserProfile | null>; // Changed to match how we're using it
   listProfiles: () => Promise<UserProfile[]>;
@@ -49,7 +57,7 @@ export const initializeCanister = async () => {
     }
 
     // Use the correct canister ID from deployment
-    canisterId = isLocalEnv ? 'bw4dl-smaaa-aaaaa-qaacq-cai' : 'YOUR_PRODUCTION_CANISTER_ID';
+    canisterId = process.env.NEXT_PUBLIC_BACKEND_CANISTER_ID || '';
     
     // Once we have generated declarations, we'll replace this with properly typed Actor
     actor = Actor.createActor<BitobytesBackend>(
@@ -60,7 +68,11 @@ export const initializeCanister = async () => {
           'uploader': IDL.Principal,
           'title': IDL.Text,
           'mediaRef': IDL.Text,
+          'thumbnailCid': IDL.Text,
+          'hlsCid': IDL.Text,
+          'duration': IDL.Nat,
           'likes': IDL.Nat,
+          'views': IDL.Nat,
           'timestamp': IDL.Int,
         });
         
@@ -72,11 +84,15 @@ export const initializeCanister = async () => {
         
         return IDL.Service({
           // Existing video methods
-          'addVideo': IDL.Func([IDL.Text, IDL.Text], [IDL.Nat64], []),
+          'addVideo': IDL.Func([IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Nat], [IDL.Nat64], []),
           'getVideos': IDL.Func([], [IDL.Vec(Video)], ['query']),
           'likeVideo': IDL.Func([IDL.Nat64], [IDL.Bool], []),
           
-          // New profile methods
+          // New video methods
+          'getVideo': IDL.Func([IDL.Nat64], [IDL.Opt(Video)], ['query']),
+          'incrementViewCount': IDL.Func([IDL.Nat64], [IDL.Bool], []),
+          
+          // Profile methods
           'saveMyProfile': IDL.Func([IDL.Text, IDL.Text], [UserProfile], []),
           'getMyProfile': IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
           'listProfiles': IDL.Func([], [IDL.Vec(UserProfile)], ['query']),
@@ -99,3 +115,18 @@ export const getBackendActor = async (): Promise<BitobytesBackend> => {
   }
   return actor;
 };
+
+/**
+ * Like a video by its ID
+ * @param videoId The ID of the video to like
+ * @returns Promise resolving to a boolean indicating success
+ */
+export async function likeVideo(videoId: bigint): Promise<boolean> {
+  try {
+    const actor = await getBackendActor();
+    return await actor.likeVideo(videoId);
+  } catch (error) {
+    console.error('Error liking video:', error);
+    throw error;
+  }
+}

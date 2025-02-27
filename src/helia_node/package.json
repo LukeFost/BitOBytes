@@ -1,0 +1,37 @@
+{
+  "name": "bitobytes-helia-node",
+  "version": "1.0.0",
+  "description": "Helia IPFS node for BitOBytes",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "keywords": [
+    "ipfs",
+    "helia",
+    "bitobytes"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@helia/unixfs": "^4.0.2",
+    "blockstore-fs": "^2.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "ffmpeg-static": "^4.4.0",
+    "fluent-ffmpeg": "^2.1.2",
+    "form-data": "^4.0.2",
+    "fs-extra": "^11.1.1",
+    "helia": "^5.2.1",
+    "http-proxy-middleware": "^3.0.3",
+    "morgan": "^1.10.0",
+    "multer": "^1.4.5-lts.1",
+    "multiformats": "^13.3.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}

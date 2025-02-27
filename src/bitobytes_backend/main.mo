@@ -16,7 +16,11 @@ actor {
     uploader: Principal;
     title: Text;
     mediaRef: Text;
+    thumbnailCid: Text;
+    hlsCid: Text;
+    duration: Nat;
     likes: Nat;
+    views: Nat; // Add view count field
     timestamp: Int;
   };
 
@@ -25,14 +29,18 @@ actor {
   private var videos = HashMap.HashMap<Nat64, Video>(0, Nat64.equal, func(n: Nat64) : Hash.Hash { Hash.hash(Nat64.toNat(n)) });
 
   // Method to add a new video
-  public shared(msg) func addVideo(title: Text, mediaRef: Text) : async Nat64 {
+  public shared(msg) func addVideo(title: Text, mediaRef: Text, thumbnailCid: Text, hlsCid: Text, duration: Nat) : async Nat64 {
     let videoId = nextId;
     let video: Video = {
       id = videoId;
       uploader = msg.caller;
       title = title;
       mediaRef = mediaRef;
+      thumbnailCid = thumbnailCid;
+      hlsCid = hlsCid;
+      duration = duration;
       likes = 0;
+      views = 0; // Initialize views to 0
       timestamp = Time.now();
     };
     
@@ -59,7 +67,41 @@ actor {
           uploader = video.uploader;
           title = video.title;
           mediaRef = video.mediaRef;
+          thumbnailCid = video.thumbnailCid;
+          hlsCid = video.hlsCid;
+          duration = video.duration;
           likes = video.likes + 1;
+          views = video.views;
+          timestamp = video.timestamp;
+        };
+        videos.put(videoId, updatedVideo);
+        return true;
+      };
+    }
+  };
+
+  // Method to get a single video by ID
+  public query func getVideo(videoId: Nat64) : async ?Video {
+    return videos.get(videoId);
+  };
+
+  // Method to increment view count
+  public func incrementViewCount(videoId: Nat64) : async Bool {
+    switch (videos.get(videoId)) {
+      case (null) {
+        return false; // Video not found
+      };
+      case (?video) {
+        let updatedVideo: Video = {
+          id = video.id;
+          uploader = video.uploader;
+          title = video.title;
+          mediaRef = video.mediaRef;
+          thumbnailCid = video.thumbnailCid;
+          hlsCid = video.hlsCid;
+          duration = video.duration;
+          likes = video.likes;
+          views = video.views + 1; // Increment view count
           timestamp = video.timestamp;
         };
         videos.put(videoId, updatedVideo);

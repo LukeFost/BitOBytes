@@ -40,6 +40,12 @@ const Navigation: React.FC = () => {
                 >
                   All Profiles
                 </Link>
+                <Link 
+                  href="/upload" 
+                  className={`hover:text-blue-300 ${isActive('/upload') ? 'text-blue-300' : ''}`}
+                >
+                  Upload Video
+                </Link>
               </>
             )}
           </div>
