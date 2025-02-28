@@ -4,6 +4,8 @@ import Head from 'next/head';
 import dynamic from 'next/dynamic';
 import Navigation from '../../components/Navigation';
 import VideoPlayer from '../../components/VideoPlayer';
+import AddToQueueButton from '../../components/AddToQueueButton';
+import VideoCard from '../../components/VideoCard';
 import { getBackendActor, Video } from '../../utils/canisterUtils';
 import { getIpfsUrl } from '../../utils/ipfs';
 
@@ -16,6 +18,7 @@ const VideoDetailComponent = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [relatedVideos, setRelatedVideos] = useState<Video[]>([]);
+  const [showQueueSuccess, setShowQueueSuccess] = useState(false);
 
   useEffect(() => {
     // Fetch the specific video and related videos when the ID is available
@@ -132,6 +135,16 @@ const VideoDetailComponent = () => {
     return date.toLocaleString();
   };
 
+  // Handle queue success
+  const handleQueueSuccess = () => {
+    setShowQueueSuccess(true);
+    
+    // Hide the success message after 3 seconds
+    setTimeout(() => {
+      setShowQueueSuccess(false);
+    }, 3000);
+  };
+
   return (
     <div>
       <Head>
@@ -168,10 +181,31 @@ const VideoDetailComponent = () => {
 
               {/* Video metadata */}
               <div className="mt-4 bg-white p-4 rounded-lg shadow">
-                <h2 className="text-2xl font-bold">{video.title}</h2>
-                <p className="text-gray-600 text-sm">
-                  Uploaded on {video.timestamp ? formatDate(video.timestamp) : 'Unknown date'}
-                </p>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h2 className="text-2xl font-bold">{video.title}</h2>
+                    <p className="text-gray-600 text-sm">
+                      Uploaded on {video.timestamp ? formatDate(video.timestamp) : 'Unknown date'}
+                    </p>
+                  </div>
+                  
+                  {/* Add to Queue button */}
+                  <div className="flex items-center">
+                    <AddToQueueButton 
+                      videoId={video.id} 
+                      className="h-10 w-10 p-2"
+                      onSuccess={handleQueueSuccess}
+                    />
+                    <span className="ml-2 text-sm">Add to Queue</span>
+                    
+                    {/* Success message */}
+                    {showQueueSuccess && (
+                      <div className="ml-4 text-green-600 text-sm font-medium animate-pulse">
+                        Added to your queue!
+                      </div>
+                    )}
+                  </div>
+                </div>
                 
                 <div className="mt-4 pt-4 border-t">
                   <h3 className="font-semibold">About this video</h3>
@@ -197,42 +231,11 @@ const VideoDetailComponent = () => {
               ) : (
                 <div className="space-y-4">
                   {relatedVideos.map((relatedVideo) => (
-                    <div 
-                      key={relatedVideo.id ? relatedVideo.id.toString() : 'unknown'} 
-                      className="flex bg-white p-2 rounded-lg shadow cursor-pointer hover:bg-gray-50"
-                      onClick={() => relatedVideo.id && router.push(`/video/${relatedVideo.id.toString()}`)}
-                    >
-                      {/* Thumbnail */}
-                      <div className="w-40 h-24 bg-gray-200 rounded overflow-hidden flex-shrink-0">
-                        {relatedVideo.thumbnailCid ? (
-                          <img 
-                            src={getIpfsUrl(relatedVideo.thumbnailCid)} 
-                            alt={relatedVideo.title}
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              e.currentTarget.src = '/placeholder-thumbnail.jpg';
-                            }}
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-gray-300">
-                            <span className="text-gray-500 text-xs">No Thumbnail</span>
-                          </div>
-                        )}
-                      </div>
-                      
-                      {/* Video info */}
-                      <div className="ml-3 flex flex-col justify-between">
-                        <div>
-                          <h4 className="font-medium text-sm line-clamp-2">{relatedVideo.title}</h4>
-                          <p className="text-xs text-gray-500 mt-1">
-                            {relatedVideo.views ? `${relatedVideo.views.toString()} views` : 'No views'} • {relatedVideo.likes ? `${relatedVideo.likes.toString()} likes` : '0 likes'}
-                          </p>
-                        </div>
-                        <p className="text-xs text-gray-400">
-                          {relatedVideo.timestamp ? formatDate(relatedVideo.timestamp) : 'Unknown date'}
-                        </p>
-                      </div>
-                    </div>
+                    <VideoCard 
+                      key={relatedVideo.id.toString()}
+                      video={relatedVideo}
+                      compact={true}
+                    />
                   ))}
                 </div>
               )}

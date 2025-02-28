@@ -37,6 +37,12 @@ export interface BitobytesBackend {
   getMyProfile: () => Promise<UserProfile | null>; // Changed to match how we're using it
   listProfiles: () => Promise<UserProfile[]>;
   getMyVideos: () => Promise<Video[]>;
+  
+  // Queue methods
+  addToMyQueue: (videoId: bigint) => Promise<boolean>;
+  getMyQueuePaged: (cursor: bigint | null, limit: number) => Promise<[Video[], bigint | null]>;
+  getUserQueuePaged: (user: Principal, cursor: bigint | null, limit: number) => Promise<[Video[], bigint | null]>;
+  getRecommendedFeed: (cursor: bigint | null, limit: number) => Promise<[Video[], bigint | null]>;
 }
 
 // Will be filled in by dfx generate after deployment
@@ -97,6 +103,12 @@ export const initializeCanister = async () => {
           'getMyProfile': IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
           'listProfiles': IDL.Func([], [IDL.Vec(UserProfile)], ['query']),
           'getMyVideos': IDL.Func([], [IDL.Vec(Video)], ['query']),
+          
+          // Queue methods
+          'addToMyQueue': IDL.Func([IDL.Nat64], [IDL.Bool], []),
+          'getMyQueuePaged': IDL.Func([IDL.Opt(IDL.Nat64), IDL.Nat], [IDL.Vec(Video), IDL.Opt(IDL.Nat64)], ['query']),
+          'getUserQueuePaged': IDL.Func([IDL.Principal, IDL.Opt(IDL.Nat64), IDL.Nat], [IDL.Vec(Video), IDL.Opt(IDL.Nat64)], ['query']),
+          'getRecommendedFeed': IDL.Func([IDL.Opt(IDL.Nat64), IDL.Nat], [IDL.Vec(Video), IDL.Opt(IDL.Nat64)], []),
         });
       },
       { agent, canisterId }

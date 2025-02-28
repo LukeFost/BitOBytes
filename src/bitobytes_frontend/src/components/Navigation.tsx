@@ -29,6 +29,18 @@ const Navigation: React.FC = () => {
             {isAuthenticated && (
               <>
                 <Link 
+                  href="/feed" 
+                  className={`hover:text-blue-300 ${isActive('/feed') ? 'text-blue-300' : ''}`}
+                >
+                  Feed
+                </Link>
+                <Link 
+                  href="/my-queue" 
+                  className={`hover:text-blue-300 ${isActive('/my-queue') ? 'text-blue-300' : ''}`}
+                >
+                  My Queue
+                </Link>
+                <Link 
                   href="/profile" 
                   className={`hover:text-blue-300 ${isActive('/profile') ? 'text-blue-300' : ''}`}
                 >
