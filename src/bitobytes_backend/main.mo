@@ -337,9 +337,11 @@ actor {
    * This can be enhanced with a more sophisticated algorithm later
    */
   public func getRecommendedFeed(
-    cursor: ?Nat64,
+    cursor: [Nat64],
     limit: Nat
   ) : async ([Video], ?Nat64) {
+    // Extract the cursor value from the array (if it exists)
+    let cursorOpt = if (cursor.size() > 0) { ?cursor[0] } else { null };
     // Get all videos sorted by timestamp (newest first)
     let allVideos = Iter.toArray(videos.vals());
     let sortedVideos = Array.sort<Video>(
@@ -364,7 +366,7 @@ actor {
     var startIndex : Nat = 0;
     
     // If we have a cursor, find it in the filtered videos
-    switch (cursor) {
+    switch (cursorOpt) {
       case null {
         // no cursor => start from front
       };

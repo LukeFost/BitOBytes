@@ -85,18 +85,30 @@ export function useRecommendedFeed(userPrincipal: string) {
         const actor = await getBackendActor();
         const limit = 5;
         
-        // Handle cursor differently to avoid Invalid opt nat64 argument: null error
-        // When pageParam is null or undefined, send an empty array instead
-        let cursor;
-        if (pageParam === undefined || pageParam === null) {
-          cursor = []; // Use empty array - this will get serialized properly by Candid
-        } else {
-          cursor = [pageParam]; // Wrap it in an array with the single value
-        }
+        // Directly modify actor.getRecommendedFeed to handle the cursor correctly
+        // Create a wrapper function that handles the cursor in a way that works with candid
+        const getRecommendedFeedFixed = async (cursor: bigint | null | undefined, limit: number) => {
+          // For the initial page or null cursor
+          if (cursor === null || cursor === undefined) {
+            console.log('Making initial page call with null cursor');
+            // Try direct null approach first
+            try {
+              return await actor.getRecommendedFeed(null, limit);
+            } catch (error) {
+              console.log('Failed with null, falling back to empty array');
+              // If that fails, try with empty array
+              return await actor.getRecommendedFeed([], limit);
+            }
+          }
+          
+          // For subsequent pages with a cursor value
+          console.log('Making paginated call with cursor value:', cursor.toString());
+          return await actor.getRecommendedFeed([cursor], limit);
+        };
         
-        console.log('Calling getRecommendedFeed with cursor:', cursor, 'and limit:', limit);
-        const [videos, nextCursor] = await actor.getRecommendedFeed(cursor, limit);
-        console.log('Received videos count:', videos.length, 'nextCursor:', nextCursor);
+        // Call our wrapper function
+        const [videos, nextCursor] = await getRecommendedFeedFixed(pageParam, limit);
+        console.log('Successfully received videos:', videos.length, 'nextCursor:', nextCursor);
         
         return {
           videos,

@@ -42,7 +42,7 @@ export interface BitobytesBackend {
   addToMyQueue: (videoId: bigint) => Promise<boolean>;
   getMyQueuePaged: (cursor: bigint | null, limit: number) => Promise<[Video[], bigint | null]>;
   getUserQueuePaged: (user: Principal, cursor: bigint | null, limit: number) => Promise<[Video[], bigint | null]>;
-  getRecommendedFeed: (cursor: bigint | null, limit: number) => Promise<[Video[], bigint | null]>;
+  getRecommendedFeed: (cursor: bigint[] | [], limit: number) => Promise<[Video[], bigint | null]>;
 }
 
 // Will be filled in by dfx generate after deployment
@@ -108,7 +108,7 @@ export const initializeCanister = async () => {
           'addToMyQueue': IDL.Func([IDL.Nat64], [IDL.Bool], []),
           'getMyQueuePaged': IDL.Func([IDL.Opt(IDL.Nat64), IDL.Nat], [IDL.Vec(Video), IDL.Opt(IDL.Nat64)], ['query']),
           'getUserQueuePaged': IDL.Func([IDL.Principal, IDL.Opt(IDL.Nat64), IDL.Nat], [IDL.Vec(Video), IDL.Opt(IDL.Nat64)], ['query']),
-          'getRecommendedFeed': IDL.Func([IDL.Opt(IDL.Nat64), IDL.Nat], [IDL.Vec(Video), IDL.Opt(IDL.Nat64)], []),
+          'getRecommendedFeed': IDL.Func([IDL.Vec(IDL.Nat64), IDL.Nat], [IDL.Vec(Video), IDL.Opt(IDL.Nat64)], []),
         });
       },
       { agent, canisterId }
